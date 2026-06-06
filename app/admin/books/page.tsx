@@ -34,6 +34,7 @@ export default async function AdminBooksPage() {
             <tr className="border-b bg-muted/50">
               <th className="text-left p-3 font-medium">Title</th>
               <th className="text-left p-3 font-medium">Author</th>
+              <th className="text-left p-3 font-medium">Type</th>
               <th className="text-left p-3 font-medium">Subject</th>
               <th className="text-left p-3 font-medium">Level</th>
               <th className="text-left p-3 font-medium">Status</th>
@@ -41,10 +42,13 @@ export default async function AdminBooksPage() {
             </tr>
           </thead>
           <tbody>
-            {(books || []).map((book: { id: string; title: string; author: string; subject: string | null; level: string | null; is_published: boolean }) => (
+            {(books || []).map((book: { id: string; title: string; author: string; file_type: string; subject: string | null; level: string | null; is_published: boolean }) => (
               <tr key={book.id} className="border-b last:border-0 hover:bg-muted/30">
                 <td className="p-3 font-medium">{book.title}</td>
                 <td className="p-3 text-muted-foreground">{book.author}</td>
+                <td className="p-3">
+                  <Badge variant="outline" className="text-xs uppercase">{book.file_type || "pdf"}</Badge>
+                </td>
                 <td className="p-3">
                   {book.subject && <Badge variant="secondary" className="text-xs">{book.subject}</Badge>}
                 </td>

@@ -119,10 +119,22 @@ export default function BookReaderPage() {
           />
         )}
         {fileType === "docx" && (
-          <DocxReader fileUrl={fileUrl} bookTitle={book.title} />
+          <DocxReader
+            fileUrl={fileUrl}
+            bookTitle={book.title}
+            bookId={bookId}
+            onPageChange={handlePageChange}
+            onBookmark={handleBookmark}
+          />
         )}
         {fileType === "epub" && (
-          <EpubReader fileUrl={fileUrl} bookTitle={book.title} />
+          <EpubReader
+            fileUrl={fileUrl}
+            bookTitle={book.title}
+            bookId={bookId}
+            onPageChange={handlePageChange}
+            onBookmark={handleBookmark}
+          />
         )}
       </div>
       <div className="hidden lg:block w-[30%]">
