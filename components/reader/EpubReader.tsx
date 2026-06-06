@@ -197,7 +197,7 @@ export default function EpubReader({ fileUrl, bookTitle, bookId, onPageChange, o
             <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
           </div>
         )}
-        <div ref={viewerRef} className="h-full" />
+        <div ref={viewerRef} className="h-full epub-container" />
       </div>
     </div>
   );

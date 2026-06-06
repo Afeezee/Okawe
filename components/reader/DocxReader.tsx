@@ -25,6 +25,8 @@ export default function DocxReader({ fileUrl, bookTitle, bookId, onPageChange, o
   const [jumpTo, setJumpTo] = useState("");
   const contentRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const isScrollingProgrammatically = useRef(false);
+  const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     async function loadDocx() {
@@ -42,6 +44,7 @@ export default function DocxReader({ fileUrl, bookTitle, bookId, onPageChange, o
     loadDocx();
   }, [fileUrl]);
 
+  // Calculate total pages when content renders
   useEffect(() => {
     if (!contentRef.current || !html) return;
     const observer = new ResizeObserver(() => {
@@ -54,29 +57,44 @@ export default function DocxReader({ fileUrl, bookTitle, bookId, onPageChange, o
     return () => observer.disconnect();
   }, [html]);
 
+  // Notify parent of page changes
   useEffect(() => {
     onPageChange?.(pageNumber, numPages);
   }, [pageNumber, numPages, onPageChange]);
 
-  useEffect(() => {
+  // Scroll to page position when page number changes programmatically
+  const scrollToPage = useCallback((page: number) => {
     if (!containerRef.current) return;
-    const scrollTop = (pageNumber - 1) * PAGE_HEIGHT;
-    containerRef.current.scrollTo({ top: scrollTop * scale, behavior: "smooth" });
-  }, [pageNumber, scale]);
+    isScrollingProgrammatically.current = true;
+
+    const scrollTop = (page - 1) * PAGE_HEIGHT * scale;
+    containerRef.current.scrollTo({ top: scrollTop, behavior: "smooth" });
+
+    // Clear the programmatic flag after the smooth scroll finishes
+    if (scrollTimeout.current) clearTimeout(scrollTimeout.current);
+    scrollTimeout.current = setTimeout(() => {
+      isScrollingProgrammatically.current = false;
+    }, 600);
+  }, [scale]);
 
   const goToPage = useCallback((page: number) => {
     const p = Math.max(1, Math.min(page, numPages));
     setPageNumber(p);
-  }, [numPages]);
+    scrollToPage(p);
+  }, [numPages, scrollToPage]);
 
   function handleJump(e: React.FormEvent) {
     e.preventDefault();
     const p = parseInt(jumpTo);
-    if (!isNaN(p)) goToPage(p);
+    if (!isNaN(p) && p >= 1 && p <= numPages) {
+      goToPage(p);
+    }
     setJumpTo("");
   }
 
+  // Track page from manual user scrolling only
   function handleScroll() {
+    if (isScrollingProgrammatically.current) return;
     if (!containerRef.current) return;
     const scrollTop = containerRef.current.scrollTop / scale;
     const currentPage = Math.min(numPages, Math.floor(scrollTop / PAGE_HEIGHT) + 1);

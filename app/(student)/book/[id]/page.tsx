@@ -88,16 +88,51 @@ export default function BookReaderPage() {
     [bookId]
   );
 
+  // Cache extracted DOCX text so we don't re-fetch on every AI message
+  const docxTextCache = useRef<string | null>(null);
+
   const getPageText = useCallback(async (): Promise<string> => {
-    if (!book || book.file_type !== "pdf") return "";
+    if (!book) return "";
+    const fileType = book.file_type || "pdf";
+    const url = getBookUrl(book.file_path);
+
     try {
-      const { pdfjs } = await import("react-pdf");
-      pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
-      const url = getBookUrl(book.file_path);
-      const pdf = await pdfjs.getDocument(url).promise;
-      const page = await pdf.getPage(currentPageRef.current);
-      const textContent = await page.getTextContent();
-      return textContent.items.map((item) => ("str" in item ? (item as { str: string }).str : "")).join(" ");
+      // --- PDF: extract text from the current page ---
+      if (fileType === "pdf") {
+        const { pdfjs } = await import("react-pdf");
+        pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+        const pdf = await pdfjs.getDocument(url).promise;
+        const page = await pdf.getPage(currentPageRef.current);
+        const textContent = await page.getTextContent();
+        return textContent.items
+          .map((item) => ("str" in item ? (item as { str: string }).str : ""))
+          .join(" ");
+      }
+
+      // --- DOCX: extract raw text via mammoth, chunk by virtual page ---
+      if (fileType === "docx") {
+        if (!docxTextCache.current) {
+          const mammoth = (await import("mammoth")).default;
+          const response = await fetch(url);
+          const arrayBuffer = await response.arrayBuffer();
+          const result = await mammoth.extractRawText({ arrayBuffer });
+          docxTextCache.current = result.value;
+        }
+        const fullText = docxTextCache.current;
+        const charsPerPage = 3000;
+        const start = (currentPageRef.current - 1) * charsPerPage;
+        return fullText.slice(start, start + charsPerPage);
+      }
+
+      // --- EPUB: extract visible text from the rendered iframe ---
+      if (fileType === "epub") {
+        const iframe = document.querySelector(".epub-container iframe") as HTMLIFrameElement | null;
+        if (iframe?.contentDocument?.body) {
+          return iframe.contentDocument.body.innerText.slice(0, 3000);
+        }
+      }
+
+      return "";
     } catch {
       return "";
     }

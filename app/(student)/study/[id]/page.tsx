@@ -8,6 +8,7 @@ import { Loader2, BookOpen } from "lucide-react";
 import SummaryView from "@/components/study/SummaryView";
 import QuizView from "@/components/study/QuizView";
 import FlashcardView from "@/components/study/FlashcardView";
+import { useRef } from "react";
 import { getBookUrl } from "@/lib/utils";
 
 interface QuizQuestion {
@@ -32,6 +33,7 @@ export default function StudyPage() {
   const [quiz, setQuiz] = useState<QuizQuestion[]>([]);
   const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
   const [loading, setLoading] = useState<string | null>(null);
+  const docxTextCache = useRef<string | null>(null);
 
   useEffect(() => {
     fetch(`/api/books/${bookId}`)
@@ -40,15 +42,44 @@ export default function StudyPage() {
   }, [bookId]);
 
   const getPageText = useCallback(async (): Promise<string> => {
-    if (!book || book.file_type !== "pdf") return "";
+    if (!book) return "";
+    const fileType = book.file_type || "pdf";
+    const url = getBookUrl(book.file_path);
+
     try {
-      const { pdfjs } = await import("react-pdf");
-      pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
-      const url = getBookUrl(book.file_path);
-      const pdf = await pdfjs.getDocument(url).promise;
-      const pdfPage = await pdf.getPage(page);
-      const textContent = await pdfPage.getTextContent();
-      return textContent.items.map((item) => ("str" in item ? (item as { str: string }).str : "")).join(" ");
+      if (fileType === "pdf") {
+        const { pdfjs } = await import("react-pdf");
+        pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+        const pdf = await pdfjs.getDocument(url).promise;
+        const pdfPage = await pdf.getPage(page);
+        const textContent = await pdfPage.getTextContent();
+        return textContent.items
+          .map((item) => ("str" in item ? (item as { str: string }).str : ""))
+          .join(" ");
+      }
+
+      if (fileType === "docx") {
+        if (!docxTextCache.current) {
+          const mammoth = (await import("mammoth")).default;
+          const response = await fetch(url);
+          const arrayBuffer = await response.arrayBuffer();
+          const result = await mammoth.extractRawText({ arrayBuffer });
+          docxTextCache.current = result.value;
+        }
+        const fullText = docxTextCache.current;
+        const charsPerPage = 3000;
+        const start = (page - 1) * charsPerPage;
+        return fullText.slice(start, start + charsPerPage);
+      }
+
+      if (fileType === "epub") {
+        const iframe = document.querySelector(".epub-container iframe") as HTMLIFrameElement | null;
+        if (iframe?.contentDocument?.body) {
+          return iframe.contentDocument.body.innerText.slice(0, 3000);
+        }
+      }
+
+      return "";
     } catch {
       return "";
     }
