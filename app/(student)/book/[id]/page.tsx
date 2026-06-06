@@ -37,14 +37,21 @@ export default function BookReaderPage() {
     async function load() {
       const [bookRes, chatRes] = await Promise.all([
         fetch(`/api/books/${bookId}`),
-        fetch(`/api/bookmarks?bookId=${bookId}`),
+        fetch(`/api/ai/chat?bookId=${bookId}`),
       ]);
       const bookData = await bookRes.json();
       setBook(bookData);
       try {
         const chatData = await chatRes.json();
         if (Array.isArray(chatData)) {
-          setMessages(chatData.map((m: { role: string; content: string }) => ({ role: m.role as "user" | "assistant", content: m.content })));
+          setMessages(
+            chatData
+              .filter((m: { role?: string; content?: string }) => m.role && m.content)
+              .map((m: { role: string; content: string }) => ({
+                role: m.role as "user" | "assistant",
+                content: m.content,
+              }))
+          );
         }
       } catch {
         // no prior messages

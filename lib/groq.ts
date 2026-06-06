@@ -26,6 +26,10 @@ export async function askReadingAssistant(
   userQuestion: string,
   history: ChatHistoryItem[]
 ): Promise<string> {
+  const safeHistory = (history || []).filter(
+    (m) => m && typeof m.role === "string" && typeof m.content === "string" && ["user", "assistant"].includes(m.role)
+  );
+
   const response = await groq.chat.completions.create({
     model: GROQ_MODEL,
     max_tokens: 600,
@@ -37,7 +41,7 @@ You have access to the current page content. Answer questions clearly, define co
 If a question is unrelated to the book content, gently redirect the student.
 Keep responses concise and educational. Use bullet points where helpful.`,
       },
-      ...history,
+      ...safeHistory,
       {
         role: "user",
         content: `Current page content:\n"""\n${pageText.slice(0, 3000)}\n"""\n\nStudent's question: ${userQuestion}`,

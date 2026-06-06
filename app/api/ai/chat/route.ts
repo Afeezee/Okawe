@@ -3,6 +3,23 @@ import { askReadingAssistant } from "@/lib/groq";
 import { db } from "@/lib/db";
 import { getCurrentUserId } from "@/lib/clerk";
 
+export async function GET(req: NextRequest) {
+  const userId = await getCurrentUserId();
+  const bookId = req.nextUrl.searchParams.get("bookId");
+
+  if (!bookId) return NextResponse.json([]);
+
+  const { data } = await db
+    .from("chat_messages")
+    .select("role, content")
+    .eq("user_id", userId)
+    .eq("book_id", bookId)
+    .order("created_at", { ascending: true })
+    .limit(50);
+
+  return NextResponse.json(data || []);
+}
+
 export async function POST(req: NextRequest) {
   const userId = await getCurrentUserId();
   const { bookId, bookTitle, pageText, question, history } = await req.json();
