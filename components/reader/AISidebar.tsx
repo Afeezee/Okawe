@@ -2,7 +2,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Bot, User, Send, Loader2, Trash2, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -72,7 +71,7 @@ export default function AISidebar({ bookId, bookTitle, getPageText, initialMessa
         </div>
       </div>
 
-      <ScrollArea className="flex-1 p-3">
+      <div className="flex-1 min-h-0 overflow-y-auto p-3">
         {messages.length === 0 && (
           <div className="text-center text-sm text-muted-foreground mt-8 space-y-2">
             <Bot className="w-10 h-10 mx-auto opacity-30" />
@@ -100,7 +99,7 @@ export default function AISidebar({ bookId, bookTitle, getPageText, initialMessa
           )}
           <div ref={bottomRef} />
         </div>
-      </ScrollArea>
+      </div>
 
       <div className="p-3 border-t space-y-2">
         <Textarea

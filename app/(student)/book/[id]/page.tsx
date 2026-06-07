@@ -152,7 +152,7 @@ export default function BookReaderPage() {
   const fileType = book.file_type || "pdf";
 
   return (
-    <div className="flex h-full relative">
+    <div className="flex h-full relative overflow-hidden">
       <div className="flex-1 lg:w-[70%]">
         {fileType === "pdf" && (
           <PDFReader
@@ -183,7 +183,7 @@ export default function BookReaderPage() {
       </div>
 
       {/* Desktop: static sidebar */}
-      <div className="hidden lg:block w-[30%]">
+      <div className="hidden lg:flex lg:flex-col w-[30%] h-full overflow-hidden">
         <AISidebar
           bookId={bookId}
           bookTitle={book.title}
@@ -205,7 +205,7 @@ export default function BookReaderPage() {
         {/* Chat panel */}
         <div
           className={cn(
-            "fixed bottom-0 right-0 z-50 w-full sm:w-96 bg-card border-t sm:border-l sm:rounded-tl-2xl shadow-2xl transition-transform duration-200 ease-in-out",
+            "fixed bottom-0 right-0 z-50 w-full sm:w-96 bg-card border-t sm:border-l sm:rounded-tl-2xl shadow-2xl transition-transform duration-200 ease-in-out overflow-hidden flex flex-col",
             chatOpen
               ? "translate-y-0"
               : "translate-y-full"
