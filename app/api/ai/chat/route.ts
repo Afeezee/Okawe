@@ -34,10 +34,25 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ answer });
   } catch (err: unknown) {
+    console.error("AI chat error:", err);
     const status = (err as { status?: number })?.status;
+    const message = (err as { message?: string })?.message ?? "Unknown error";
+
     if (status === 429) {
-      return NextResponse.json({ error: "AI is busy, please try again in a moment." }, { status: 429 });
+      return NextResponse.json(
+        { answer: "⏳ AI is busy right now. Please try again in a moment." },
+        { status: 200 }
+      );
     }
-    throw err;
+    if (status === 403) {
+      return NextResponse.json(
+        { answer: "🔒 AI service access is restricted from this network. The AI chat works on the deployed Vercel site. If running locally, try using a VPN." },
+        { status: 200 }
+      );
+    }
+    return NextResponse.json(
+      { answer: `❗ AI error: ${message}. Please try again later.` },
+      { status: 200 }
+    );
   }
 }

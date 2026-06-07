@@ -24,10 +24,16 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ content });
   } catch (err: unknown) {
+    console.error("AI study error:", err);
     const status = (err as { status?: number })?.status;
+    const message = (err as { message?: string })?.message ?? "Unknown error";
+
     if (status === 429) {
       return NextResponse.json({ error: "AI is busy, please try again in a moment." }, { status: 429 });
     }
-    throw err;
+    if (status === 403) {
+      return NextResponse.json({ error: "AI service access is restricted from this network. Try the deployed Vercel site or use a VPN locally." }, { status: 403 });
+    }
+    return NextResponse.json({ error: `AI error: ${message}` }, { status: 500 });
   }
 }

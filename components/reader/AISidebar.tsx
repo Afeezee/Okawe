@@ -73,10 +73,16 @@ export default function AISidebar({ bookId, bookTitle, getPageText, initialMessa
 
       <div className="flex-1 min-h-0 overflow-y-auto p-3">
         {messages.length === 0 && (
-          <div className="text-center text-sm text-muted-foreground mt-8 space-y-2">
+          <div className="text-center text-sm text-muted-foreground mt-8 space-y-3">
             <Bot className="w-10 h-10 mx-auto opacity-30" />
-            <p>Ask me anything about what you&apos;re reading.</p>
-            <p className="text-xs">I can explain concepts, define terms, and answer questions about the current page.</p>
+            <p className="font-medium">AI Reading Assistant</p>
+            <p className="text-xs leading-relaxed">I can only answer questions about the page you&apos;re currently viewing. Navigate to a page first, then ask me to explain concepts, define terms, or summarize what&apos;s on it.</p>
+            <div className="text-xs bg-muted rounded-lg px-3 py-2 text-left space-y-1">
+              <p className="font-medium text-foreground/70">Try asking:</p>
+              <p>&bull; &ldquo;Summarize this page&rdquo;</p>
+              <p>&bull; &ldquo;What does [term] mean?&rdquo;</p>
+              <p>&bull; &ldquo;Explain this concept simply&rdquo;</p>
+            </div>
           </div>
         )}
         <div className="space-y-4">
