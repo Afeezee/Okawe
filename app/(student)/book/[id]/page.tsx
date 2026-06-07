@@ -2,8 +2,9 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import dynamic from "next/dynamic";
 import AISidebar from "@/components/reader/AISidebar";
-import { getBookUrl } from "@/lib/utils";
+import { getBookUrl, cn } from "@/lib/utils";
 import { useParams } from "next/navigation";
+import { Bot } from "lucide-react";
 
 const PDFReader = dynamic(() => import("@/components/reader/PDFReader"), { ssr: false });
 const DocxReader = dynamic(() => import("@/components/reader/DocxReader"), { ssr: false });
@@ -29,6 +30,7 @@ export default function BookReaderPage() {
   const [book, setBook] = useState<BookData | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(true);
+  const [chatOpen, setChatOpen] = useState(false);
   const currentPageRef = useRef(1);
   const totalPagesRef = useRef(0);
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
@@ -150,7 +152,7 @@ export default function BookReaderPage() {
   const fileType = book.file_type || "pdf";
 
   return (
-    <div className="flex h-full">
+    <div className="flex h-full relative">
       <div className="flex-1 lg:w-[70%]">
         {fileType === "pdf" && (
           <PDFReader
@@ -179,6 +181,8 @@ export default function BookReaderPage() {
           />
         )}
       </div>
+
+      {/* Desktop: static sidebar */}
       <div className="hidden lg:block w-[30%]">
         <AISidebar
           bookId={bookId}
@@ -186,6 +190,46 @@ export default function BookReaderPage() {
           getPageText={getPageText}
           initialMessages={messages}
         />
+      </div>
+
+      {/* Mobile: floating chat bubble + overlay panel */}
+      <div className="lg:hidden">
+        {/* Backdrop */}
+        {chatOpen && (
+          <div
+            className="fixed inset-0 z-40 bg-black/40"
+            onClick={() => setChatOpen(false)}
+          />
+        )}
+
+        {/* Chat panel */}
+        <div
+          className={cn(
+            "fixed bottom-0 right-0 z-50 w-full sm:w-96 bg-card border-t sm:border-l sm:rounded-tl-2xl shadow-2xl transition-transform duration-200 ease-in-out",
+            chatOpen
+              ? "translate-y-0"
+              : "translate-y-full"
+          )}
+          style={{ height: "70vh" }}
+        >
+          <AISidebar
+            bookId={bookId}
+            bookTitle={book.title}
+            getPageText={getPageText}
+            initialMessages={messages}
+            onClose={() => setChatOpen(false)}
+          />
+        </div>
+
+        {/* Floating bubble */}
+        {!chatOpen && (
+          <button
+            onClick={() => setChatOpen(true)}
+            className="fixed bottom-5 right-5 z-50 w-14 h-14 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center hover:scale-105 active:scale-95 transition-transform"
+          >
+            <Bot className="w-6 h-6" />
+          </button>
+        )}
       </div>
     </div>
   );

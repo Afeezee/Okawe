@@ -3,7 +3,7 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Bot, User, Send, Loader2, Trash2 } from "lucide-react";
+import { Bot, User, Send, Loader2, Trash2, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Message {
@@ -16,9 +16,10 @@ interface AISidebarProps {
   bookTitle: string;
   getPageText: () => Promise<string>;
   initialMessages?: Message[];
+  onClose?: () => void;
 }
 
-export default function AISidebar({ bookId, bookTitle, getPageText, initialMessages = [] }: AISidebarProps) {
+export default function AISidebar({ bookId, bookTitle, getPageText, initialMessages = [], onClose }: AISidebarProps) {
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -59,9 +60,16 @@ export default function AISidebar({ bookId, bookTitle, getPageText, initialMessa
           <Bot className="w-4 h-4 text-primary" />
           <span className="text-sm font-medium">AI Reading Assistant</span>
         </div>
-        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setMessages([])}>
-          <Trash2 className="w-3.5 h-3.5" />
-        </Button>
+        <div className="flex items-center gap-1">
+          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setMessages([])}>
+            <Trash2 className="w-3.5 h-3.5" />
+          </Button>
+          {onClose && (
+            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={onClose}>
+              <X className="w-3.5 h-3.5" />
+            </Button>
+          )}
+        </div>
       </div>
 
       <ScrollArea className="flex-1 p-3">
