@@ -12,6 +12,7 @@ interface Book {
   cover?: string | null;
   subject?: string | null;
   level?: string | null;
+  contributor_credit?: string | null;
 }
 
 export default function BookCard({ book }: { book: Book }) {
@@ -30,6 +31,9 @@ export default function BookCard({ book }: { book: Book }) {
         <div>
           <h3 className="font-semibold text-sm line-clamp-2">{book.title}</h3>
           <p className="text-xs text-muted-foreground mt-1">{book.author}</p>
+          {book.contributor_credit && (
+            <p className="text-[11px] text-muted-foreground/80 mt-0.5">Contributed by {book.contributor_credit}</p>
+          )}
         </div>
         <div className="flex gap-2 flex-wrap">
           {book.subject && <Badge variant="secondary" className="text-xs">{book.subject}</Badge>}

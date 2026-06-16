@@ -6,9 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Loader2 } from "lucide-react";
-
-const subjects = ["Computer Science", "Engineering", "Mathematics", "Physics", "Chemistry", "Biology", "Social Sciences", "Law", "Medicine"];
-const levels = ["100L", "200L", "300L", "400L", "500L", "Postgraduate"];
+import { LEVELS } from "@/lib/constants";
+import SubjectSelect from "@/components/library/SubjectSelect";
 
 export default function BookUploadForm({ initialData }: { initialData?: Record<string, unknown> }) {
   const router = useRouter();
@@ -110,17 +109,7 @@ export default function BookUploadForm({ initialData }: { initialData?: Record<s
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="subject">Subject</Label>
-          <select
-            id="subject"
-            value={form.subject}
-            onChange={(e) => updateField("subject", e.target.value)}
-            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-          >
-            <option value="">Select subject</option>
-            {subjects.map((s) => (
-              <option key={s} value={s}>{s}</option>
-            ))}
-          </select>
+          <SubjectSelect id="subject" value={form.subject} onChange={(v) => updateField("subject", v)} />
         </div>
 
         <div className="space-y-2">
@@ -132,7 +121,7 @@ export default function BookUploadForm({ initialData }: { initialData?: Record<s
             className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
           >
             <option value="">Select level</option>
-            {levels.map((l) => (
+            {LEVELS.map((l) => (
               <option key={l} value={l}>{l}</option>
             ))}
           </select>

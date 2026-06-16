@@ -1,11 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { canReadBook } from "@/lib/access";
 
 export async function GET(_: NextRequest, ctx: RouteContext<"/api/books/[id]">) {
   const { id } = await ctx.params;
   const { data, error } = await db.from("books").select("*").eq("id", id).single();
 
   if (error || !data) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
+  // Block opening private/pending books by guessing the URL.
+  const { allowed } = await canReadBook(id);
+  if (!allowed) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+
   return NextResponse.json(data);
 }
 

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 import { UserButton } from "@clerk/nextjs";
-import { BookOpen, Home, Search, Bookmark, GraduationCap, Shield, Menu, X } from "lucide-react";
+import { BookOpen, Home, Search, Bookmark, GraduationCap, Shield, Menu, X, FolderUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,7 @@ const navItems = [
   { href: "/catalogue", label: "Browse Books", icon: BookOpen },
   { href: "/search", label: "Search", icon: Search },
   { href: "/bookmarks", label: "Bookmarks", icon: Bookmark },
+  { href: "/my-library", label: "My Library", icon: FolderUp },
 ];
 
 export default function StudentSidebar() {

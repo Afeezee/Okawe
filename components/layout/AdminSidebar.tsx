@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { UserButton } from "@clerk/nextjs";
-import { LayoutDashboard, BookOpen, Users, GraduationCap, ArrowLeftRight, Menu, X } from "lucide-react";
+import { LayoutDashboard, BookOpen, Users, GraduationCap, ArrowLeftRight, Menu, X, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { Button } from "@/components/ui/button";
@@ -11,16 +11,26 @@ import { Button } from "@/components/ui/button";
 const navItems = [
   { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/books", label: "Books", icon: BookOpen },
+  { href: "/admin/moderation", label: "Moderation", icon: ShieldCheck },
   { href: "/admin/users", label: "Users", icon: Users },
 ];
 
 export default function AdminSidebar() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [pending, setPending] = useState(0);
 
   // Auto-close sidebar on route change (mobile)
   useEffect(() => {
     setOpen(false);
+  }, [pathname]);
+
+  // Keep the moderation badge in sync (refresh when the route changes).
+  useEffect(() => {
+    fetch("/api/moderation")
+      .then((r) => (r.ok ? r.json() : { pending: 0 }))
+      .then((d) => setPending(d.pending ?? 0))
+      .catch(() => {});
   }, [pathname]);
 
   return (
@@ -86,7 +96,12 @@ export default function AdminSidebar() {
               )}
             >
               <Icon className="w-4 h-4" />
-              {label}
+              <span className="flex-1">{label}</span>
+              {href === "/admin/moderation" && pending > 0 && (
+                <span className="ml-auto text-xs bg-amber-500 text-white rounded-full px-1.5 py-0.5 min-w-5 text-center">
+                  {pending}
+                </span>
+              )}
             </Link>
           ))}
 

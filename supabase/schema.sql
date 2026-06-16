@@ -62,6 +62,22 @@ create table if not exists study_sessions (
   created_at timestamptz not null default now()
 );
 
+-- ─── USER CONTRIBUTION FIELDS (additive, non-destructive) ───
+-- Run this block on existing databases too; it is safe to re-run.
+alter table books add column if not exists uploaded_by text;          -- Clerk userId of uploader. NULL = admin/system seed.
+alter table books add column if not exists uploader_name text;        -- cached display name of uploader
+alter table books add column if not exists visibility text not null default 'PUBLIC';  -- PRIVATE | PENDING | PUBLIC | REJECTED
+alter table books add column if not exists rights_confirmed boolean not null default false;
+alter table books add column if not exists rejection_reason text;
+alter table books add column if not exists contributor_credit text;   -- admin sets at approval; null = anonymous
+alter table books add column if not exists reviewed_by text;
+alter table books add column if not exists reviewed_at timestamptz;
+
+create index if not exists idx_books_uploaded_by on books(uploaded_by);
+create index if not exists idx_books_visibility on books(visibility);
+
+-- Existing/seeded rows keep visibility 'PUBLIC' via the column default.
+
 -- Seed data: sample books
 insert into books (id, title, author, subject, level, description, file_path, tags) values
   ('seed-intro-algo', 'Introduction to Algorithms', 'Cormen, Leiserson, Rivest, Stein', 'Computer Science', '300L', 'The classic algorithms textbook covering sorting, data structures, graph algorithms, and more.', 'sample.pdf', 'algorithms,data structures,computer science'),

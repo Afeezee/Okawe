@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import AISidebar from "@/components/reader/AISidebar";
 import { getBookUrl, cn } from "@/lib/utils";
 import { useParams } from "next/navigation";
+import Link from "next/link";
 import { Bot } from "lucide-react";
 
 const PDFReader = dynamic(() => import("@/components/reader/PDFReader"), { ssr: false });
@@ -30,6 +31,7 @@ export default function BookReaderPage() {
   const [book, setBook] = useState<BookData | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(true);
+  const [denied, setDenied] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
   const currentPageRef = useRef(1);
   const totalPagesRef = useRef(0);
@@ -41,6 +43,11 @@ export default function BookReaderPage() {
         fetch(`/api/books/${bookId}`),
         fetch(`/api/ai/chat?bookId=${bookId}`),
       ]);
+      if (!bookRes.ok) {
+        setDenied(true);
+        setLoading(false);
+        return;
+      }
       const bookData = await bookRes.json();
       setBook(bookData);
       try {
@@ -142,6 +149,20 @@ export default function BookReaderPage() {
 
   if (loading) {
     return <div className="flex items-center justify-center h-full text-muted-foreground">Loading book...</div>;
+  }
+
+  if (denied) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full gap-3 text-center px-6">
+        <p className="text-lg font-semibold">Access denied</p>
+        <p className="text-muted-foreground max-w-md">
+          You don&apos;t have permission to read this book. It may be private or awaiting approval.
+        </p>
+        <Link href="/catalogue" className="text-primary underline text-sm">
+          Back to catalogue
+        </Link>
+      </div>
+    );
   }
 
   if (!book) {

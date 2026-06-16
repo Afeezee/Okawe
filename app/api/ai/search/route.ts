@@ -8,7 +8,8 @@ export async function POST(req: NextRequest) {
   const { data: allBooks } = await db
     .from("books")
     .select("id, title, author, subject, description")
-    .eq("is_published", true);
+    .eq("is_published", true)
+    .eq("visibility", "PUBLIC");
 
   if (!allBooks) return NextResponse.json({ books: [] });
 

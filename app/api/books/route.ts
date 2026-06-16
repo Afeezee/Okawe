@@ -6,7 +6,12 @@ export async function GET(req: NextRequest) {
   const subject = searchParams.get("subject");
   const level = searchParams.get("level");
 
-  let query = db.from("books").select("*").eq("is_published", true).order("created_at", { ascending: false });
+  let query = db
+    .from("books")
+    .select("*")
+    .eq("is_published", true)
+    .eq("visibility", "PUBLIC")
+    .order("created_at", { ascending: false });
 
   if (subject) query = query.eq("subject", subject);
   if (level) query = query.eq("level", level);

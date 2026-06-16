@@ -7,8 +7,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const subjects = ["All", "Computer Science", "Engineering", "Mathematics", "Physics", "Chemistry", "Biology", "Social Sciences", "Law", "Medicine"];
-const levels = ["All", "100L", "200L", "300L", "400L", "500L", "Postgraduate"];
+import { SUBJECTS, LEVELS } from "@/lib/constants";
+
+const subjects = ["All", ...SUBJECTS];
+const levels = ["All", ...LEVELS];
 
 interface Book {
   id: string;
