@@ -2,7 +2,7 @@ import Groq from "groq-sdk";
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
-export const GROQ_MODEL = "meta-llama/llama-4-maverick-17b-128e-instruct";
+export const GROQ_MODEL = "qwen/qwen3.6-27b";
 
 export type ChatHistoryItem = {
   role: "user" | "assistant";
@@ -32,6 +32,7 @@ export async function askReadingAssistant(
 
   const response = await groq.chat.completions.create({
     model: GROQ_MODEL,
+    reasoning_effort: "none", // qwen3.6 is a reasoning model; disable CoT so output is clean & JSON-parseable
     max_tokens: 600,
     messages: [
       {
@@ -63,6 +64,7 @@ export async function semanticSearch(
 
   const response = await groq.chat.completions.create({
     model: GROQ_MODEL,
+    reasoning_effort: "none", // qwen3.6 is a reasoning model; disable CoT so output is clean & JSON-parseable
     max_tokens: 200,
     messages: [
       {
@@ -94,6 +96,7 @@ Do not include any explanation or markdown.`,
 export async function generateSummary(bookTitle: string, pageText: string): Promise<string> {
   const response = await groq.chat.completions.create({
     model: GROQ_MODEL,
+    reasoning_effort: "none", // qwen3.6 is a reasoning model; disable CoT so output is clean & JSON-parseable
     max_tokens: 800,
     messages: [
       {
@@ -116,6 +119,7 @@ ${pageText.slice(0, 4000)}`,
 export async function generateQuiz(bookTitle: string, pageText: string): Promise<QuizQuestion[]> {
   const response = await groq.chat.completions.create({
     model: GROQ_MODEL,
+    reasoning_effort: "none", // qwen3.6 is a reasoning model; disable CoT so output is clean & JSON-parseable
     max_tokens: 1000,
     messages: [
       {
@@ -147,6 +151,7 @@ ${pageText.slice(0, 4000)}`,
 export async function generateFlashcards(bookTitle: string, pageText: string): Promise<Flashcard[]> {
   const response = await groq.chat.completions.create({
     model: GROQ_MODEL,
+    reasoning_effort: "none", // qwen3.6 is a reasoning model; disable CoT so output is clean & JSON-parseable
     max_tokens: 800,
     messages: [
       {
@@ -189,6 +194,7 @@ export async function getRecommendations(
 
   const response = await groq.chat.completions.create({
     model: GROQ_MODEL,
+    reasoning_effort: "none", // qwen3.6 is a reasoning model; disable CoT so output is clean & JSON-parseable
     max_tokens: 150,
     messages: [
       {
