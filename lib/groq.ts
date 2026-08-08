@@ -2,7 +2,7 @@ import Groq from "groq-sdk";
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
-export const GROQ_MODEL = "meta-llama/llama-4-scout-17b-16e-instruct";
+export const GROQ_MODEL = "meta-llama/llama-4-maverick-17b-128e-instruct";
 
 export type ChatHistoryItem = {
   role: "user" | "assistant";
